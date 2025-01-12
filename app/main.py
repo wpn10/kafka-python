@@ -3,7 +3,23 @@ import socket
 def create_message(correlation_id, error_code):
     id_bytes = correlation_id.to_bytes(4, byteorder='big')
     error_code_bytes = error_code.to_bytes(2, byteorder='big', signed=True)
-    return len(id_bytes + error_code_bytes).to_bytes(4, byteorder='big') + id_bytes + error_code_bytes
+    
+    # Create the response body for APIVersions
+    api_key = 18
+    min_version = 0
+    max_version = 4
+    api_key_bytes = api_key.to_bytes(2, byteorder='big')
+    min_version_bytes = min_version.to_bytes(2, byteorder='big')
+    max_version_bytes = max_version.to_bytes(2, byteorder='big')
+    
+    # Construct the response body
+    response_body = api_key_bytes + min_version_bytes + max_version_bytes
+    
+    # Calculate the total message length
+    total_length = len(id_bytes + error_code_bytes + response_body)
+    
+    # Construct the full message
+    return total_length.to_bytes(4, byteorder='big') + id_bytes + error_code_bytes + response_body
 
 def handle_client(client_socket, client_address):
     # First read the length (4 bytes)
